@@ -1,24 +1,32 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from PyQt5.QtGui import QPainter, QPen, QColor, QPalette, QBrush, QPixmap, QRadialGradient, QCursor
 from PyQt5.QtCore import Qt, QPoint, QTimer
-import traceback
+from PyQt5.QtWidgets import QWidget
 from game import Gomoku
-from corner_widget import CornerWidget
+import traceback
 import os
 import QssTools
 
 
-def run_with_exc(f):
-    """游戏运行出现错误时，用messagebox把错误信息显示出来"""
+class CornerWidget(QWidget):
 
-    def call(window, *args, **kwargs):
-        try:
-            return f(window, *args, **kwargs)
-        except Exception:
-            exc_info = traceback.format_exc()
-            QMessageBox.about(window, '错误信息', exc_info)
+    def __init__(self, parent):
+        super().__init__(parent=parent)
+        self.setFixedSize(30, 30)
 
-    return call
+    def paintEvent(self, e):
+        qp = QPainter()
+        qp.begin(self)
+        pen = QPen(Qt.red, 3, Qt.SolidLine)
+        qp.setPen(pen)
+        qp.drawLine(0, 8, 0, 0)
+        qp.drawLine(0, 0, 8, 0)
+        qp.drawLine(22, 0, 28, 0)
+        qp.drawLine(28, 0, 28, 8)
+        qp.drawLine(28, 22, 28, 28)
+        qp.drawLine(28, 28, 20, 28)
+        qp.drawLine(8, 28, 0, 28)
+        qp.drawLine(0, 28, 0, 22)
 
 
 class GomokuWindow(QMainWindow):
@@ -29,7 +37,7 @@ class GomokuWindow(QMainWindow):
         self.g = Gomoku()  # 初始化游戏内容
 
         self.last_pos = (-1, -1)
-        self.res = 0  # 记录那边获得了胜利
+        self.res = 0  # 记录哪边获得了胜利
         self.operate_status = 0  # 游戏操作状态。0为游戏中（可操作），1为游戏结束闪烁过程中（不可操作）
 
     def init_ui(self):
@@ -45,7 +53,7 @@ class GomokuWindow(QMainWindow):
 
         # 2 设置鼠标光标样式
         # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
-        pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png')).scaled(15, 20)
+        pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png'))
         # 2.2 将光标对象传入鼠标对象中
         cursor = QCursor(pixmap, 0, 0)
         # 2.3 设置控件的光标
@@ -65,9 +73,7 @@ class GomokuWindow(QMainWindow):
         # 5.QSS美化
         QssTools.SetQss(os.path.join(os.getcwd(), 'src', 'qss', 'ThreeStateStyle.qss'), self)
         # 6. 显示初始化的游戏界面
-        self.show()
 
-    @run_with_exc
     def paintEvent(self, e):
         """绘制游戏内容"""
 
@@ -90,7 +96,6 @@ class GomokuWindow(QMainWindow):
             """绘制棋子"""
             # 绘制黑棋子
             qp.setPen(QPen(QColor(0, 0, 0), 1, Qt.SolidLine))
-            # qp.setBrush(QColor(0, 0, 0))
             for x in range(15):
                 for y in range(15):
                     if self.g.g_map[x][y] == 1:
@@ -121,7 +126,6 @@ class GomokuWindow(QMainWindow):
             draw_pieces()  # 绘制棋子
             qp.end()
 
-    @run_with_exc
     def mouseMoveEvent(self, e):
         # 1. 首先判断鼠标位置对应棋盘中的哪一个格子
         mouse_x = e.windowPos().x()
@@ -150,7 +154,6 @@ class GomokuWindow(QMainWindow):
         if pos_change and game_x == -1:
             self.corner_widget.hide()
 
-    @run_with_exc
     def mousePressEvent(self, e):
         """根据鼠标的动作，确定落子位置"""
         if not (hasattr(self, 'operate_status') and self.operate_status == 0):
@@ -172,15 +175,12 @@ class GomokuWindow(QMainWindow):
                 self.repaint(0, 0, 650, 650)
                 self.game_restart(res)
                 return
-            self.g.ai_play_1step()  # 电脑下一步
-            res, self.flash_pieces = self.g.game_result(show=True)
-            if res != 0:
-                self.repaint(0, 0, 650, 650)
-                self.game_restart(res)
-                return
+
+            # TODO: 目前只有玩家在玩
+            #  需要在完成AI部分代码后，仿照上述部分进行AI落子操作
+
             self.repaint(0, 0, 650, 650)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
 
-    @run_with_exc
     def end_flash(self):
         # 游戏结束时的闪烁操作
         if self.flash_cnt <= 5:
@@ -197,8 +197,6 @@ class GomokuWindow(QMainWindow):
                 QMessageBox.about(self, '游戏结束', '电脑获胜!')
             elif self.res == 3:
                 QMessageBox.about(self, '游戏结束', '平局!')
-            else:
-                raise ValueError('当前游戏结束的标志位为' + str(self.res) + '. 而游戏结束的标志位必须为1, 2 或 3')
             # 2. 游戏重新开始的操作
             self.res = 0
             self.operate_status = 0

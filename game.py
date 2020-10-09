@@ -1,5 +1,4 @@
 import time
-from ai import AI1Step
 
 
 class Gomoku:
@@ -12,15 +11,18 @@ class Gomoku:
     def move_1step(self, pos_x=None, pos_y=None):
         """
         玩家落子
-        :param pos_x: 从图形界面输入时，输入的x坐标为多少
-        :param pos_y: 从图形界面输入时，输入的y坐标为多少
+        :param pos_x: 输入的x坐标
+        :param pos_y: 输入的y坐标
         """
         while True:
-            if 0 <= pos_x <= 14 and 0 <= pos_y <= 14:  # 判断这个格子能否落子
-                if self.g_map[pos_x][pos_y] == 0:
+            # TODO: 加入AI后，需要把内嵌if语句删掉
+            if self.g_map[pos_x][pos_y] == 0:
+                if self.cur_step % 2 == 0:
                     self.g_map[pos_x][pos_y] = 1
-                    self.cur_step += 1
-                    return
+                else:
+                    self.g_map[pos_x][pos_y] = 2
+                self.cur_step += 1
+                return
 
     def game_result(self, show=False):
         """判断游戏的结局。0为游戏进行中，1为玩家获胜，2为电脑获胜，3为平局"""
@@ -125,49 +127,3 @@ class Gomoku:
             return 3, [(-1, -1)]
         else:
             return 3
-
-    def ai_move_1step(self):
-        """电脑落子"""
-        for x in range(15):
-            for y in range(15):
-                if self.g_map[x][y] == 0:
-                    self.g_map[x][y] = 2
-                    self.cur_step += 1
-                    return
-
-    def ai_play_1step(self):
-        self.max_search_steps = 2
-        ai = AI1Step(self, self.cur_step, True)  # AI判断下一步执行什么操作
-        st = time.time()
-        ai.search(0, [set(), set()], self.max_search_steps)  # 最远看2回合之后
-        ed = time.time()
-        print('生成了%d个节点，用时%.4f，评价用时%.4f' % (len(ai.method_tree), ed - st, ai.t))
-        if ai.next_node_dx_list[0] == -1:
-            raise ValueError('ai.next_node_dx_list[0] == -1')
-        ai_ope = ai.method_tree[ai.next_node_dx_list[0]].ope
-        if self.g_map[ai_ope[0]][ai_ope[1]] != 0:
-            raise ValueError('self.game_map[ai_ope[0]][ai_ope[1]] = %d' % self.g_map[ai_ope[0]][ai_ope[1]])
-        self.g_map[ai_ope[0]][ai_ope[1]] = 2
-        self.cur_step += 1
-
-    def show(self, res):
-        if res == 1:
-            print('玩家获胜!')
-        elif res == 2:
-            print('电脑获胜!')
-        elif res == 3:
-            print('平局!')
-
-    def play(self):
-        while True:
-            self.move_1step()  # 玩家下一步
-            res = self.game_result()  # 判断游戏结果
-            if res != 0:  # 如果游戏结果为“已经结束”，则显示游戏内容，并退出主循环
-                self.show(res)
-                return
-            self.ai_move_1step()  # 电脑下一步
-            res = self.game_result()
-            if res != 0:
-                self.show(res)
-                return
-            self.show(0)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
