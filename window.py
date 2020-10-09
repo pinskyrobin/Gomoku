@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from PyQt5.QtGui import QPainter, QPen, QColor, QPalette, QBrush, QPixmap, QRadialGradient
+from PyQt5.QtGui import QPainter, QPen, QColor, QPalette, QBrush, QPixmap, QRadialGradient, QCursor
 from PyQt5.QtCore import Qt, QPoint, QTimer
 import traceback
 from game import Gomoku
 from corner_widget import CornerWidget
+import os
+import QssTools
 
 
 def run_with_exc(f):
@@ -15,6 +17,7 @@ def run_with_exc(f):
         except Exception:
             exc_info = traceback.format_exc()
             QMessageBox.about(window, '错误信息', exc_info)
+
     return call
 
 
@@ -35,9 +38,19 @@ class GomokuWindow(QMainWindow):
         self.setObjectName('MainWindow')
         self.setWindowTitle('五子棋')
         self.setFixedSize(650, 650)
+        # 使用调色板功能
         palette = QPalette()
-        palette.setBrush(QPalette.Window, QBrush(QPixmap('imgs/muzm.jpg')))
+        palette.setBrush(QPalette.Window, QBrush(QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'muzm.jpg'))))
         self.setPalette(palette)
+
+        # 2 设置鼠标光标样式
+        # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
+        pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png')).scaled(15, 20)
+        # 2.2 将光标对象传入鼠标对象中
+        cursor = QCursor(pixmap, 0, 0)
+        # 2.3 设置控件的光标
+        self.setCursor(cursor)
+
         # 2. 开启鼠标位置的追踪。并在鼠标位置移动时，使用特殊符号标记当前的位置
         self.setMouseTracking(True)
         # 3. 鼠标位置移动时，对鼠标位置的特殊标记
@@ -48,8 +61,10 @@ class GomokuWindow(QMainWindow):
         self.end_timer = QTimer(self)
         self.end_timer.timeout.connect(self.end_flash)
         self.flash_cnt = 0  # 游戏结束之前闪烁了多少次
-        self.flash_pieces = ((-1, -1), )  # 哪些棋子需要闪烁
-        # 5. 显示初始化的游戏界面
+        self.flash_pieces = ((-1, -1),)  # 哪些棋子需要闪烁
+        # 5.QSS美化
+        QssTools.SetQss(os.path.join(os.getcwd(), 'src', 'qss', 'ThreeStateStyle.qss'), self)
+        # 6. 显示初始化的游戏界面
         self.show()
 
     @run_with_exc
@@ -111,7 +126,8 @@ class GomokuWindow(QMainWindow):
         # 1. 首先判断鼠标位置对应棋盘中的哪一个格子
         mouse_x = e.windowPos().x()
         mouse_y = e.windowPos().y()
-        if 25 <= mouse_x <= 615 and 25 <= mouse_y <= 615 and (mouse_x % 40 <= 15 or mouse_x % 40 >= 25) and (mouse_y % 40 <= 15 or mouse_y % 40 >= 25):
+        if 25 <= mouse_x <= 615 and 25 <= mouse_y <= 615 and (mouse_x % 40 <= 15 or mouse_x % 40 >= 25) and (
+                mouse_y % 40 <= 15 or mouse_y % 40 >= 25):
             game_x = int((mouse_x + 15) // 40) - 1
             game_y = int((mouse_y + 15) // 40) - 1
         else:  # 鼠标当前的位置不对应任何一个游戏格子，将其标记为(-1, -1)
@@ -148,7 +164,7 @@ class GomokuWindow(QMainWindow):
                 game_y = int((mouse_y + 15) // 40) - 1
             else:  # 鼠标点击的位置不正确
                 return
-            self.g.move_1step(True, game_x, game_y)
+            self.g.move_1step(game_x, game_y)
 
             # 2. 根据操作结果进行一轮游戏循环
             res, self.flash_pieces = self.g.game_result(show=True)  # 判断游戏结果
