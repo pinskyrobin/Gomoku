@@ -1,6 +1,3 @@
-import time
-
-
 class Gomoku:
 
     def __init__(self):

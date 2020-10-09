@@ -3,7 +3,6 @@ from PyQt5.QtGui import QPainter, QPen, QColor, QPalette, QBrush, QPixmap, QRadi
 from PyQt5.QtCore import Qt, QPoint, QTimer
 from PyQt5.QtWidgets import QWidget
 from game import Gomoku
-import traceback
 import os
 import QssTools
 
@@ -46,18 +45,19 @@ class GomokuWindow(QMainWindow):
         self.setObjectName('MainWindow')
         self.setWindowTitle('五子棋')
         self.setFixedSize(650, 650)
+
         # 使用调色板功能
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'muzm.jpg'))))
         self.setPalette(palette)
 
-        # 2 设置鼠标光标样式
-        # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
-        pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png'))
-        # 2.2 将光标对象传入鼠标对象中
-        cursor = QCursor(pixmap, 0, 0)
-        # 2.3 设置控件的光标
-        self.setCursor(cursor)
+        # # 2. 设置鼠标光标样式
+        # # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
+        # pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png'))
+        # # 2.2 将光标对象传入鼠标对象中
+        # cursor = QCursor(pixmap, 0, 0)
+        # # 2.3 设置控件的光标
+        # self.setCursor(cursor)
 
         # 2. 开启鼠标位置的追踪。并在鼠标位置移动时，使用特殊符号标记当前的位置
         self.setMouseTracking(True)
@@ -73,6 +73,7 @@ class GomokuWindow(QMainWindow):
         # 5.QSS美化
         QssTools.SetQss(os.path.join(os.getcwd(), 'src', 'qss', 'ThreeStateStyle.qss'), self)
         # 6. 显示初始化的游戏界面
+        self.show()
 
     def paintEvent(self, e):
         """绘制游戏内容"""
