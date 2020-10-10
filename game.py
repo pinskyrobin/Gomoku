@@ -13,13 +13,14 @@ class Gomoku:
         """
         while True:
             # TODO: 加入AI后，需要把内嵌if语句删掉
-            if self.g_map[pos_x][pos_y] == 0:
-                if self.cur_step % 2 == 0:
-                    self.g_map[pos_x][pos_y] = 1
-                else:
-                    self.g_map[pos_x][pos_y] = 2
-                self.cur_step += 1
-                return
+            if 0 <= pos_x <= 14 and 0 <= pos_y <= 14:
+                if self.g_map[pos_x][pos_y] == 0:
+                    if self.cur_step % 2 == 0:
+                        self.g_map[pos_x][pos_y] = 1
+                    else:
+                        self.g_map[pos_x][pos_y] = 2
+                    self.cur_step += 1
+                    return
 
     def game_result(self, show=False):
         """判断游戏的结局。0为游戏进行中，1为玩家获胜，2为电脑获胜，3为平局"""

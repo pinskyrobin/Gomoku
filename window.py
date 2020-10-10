@@ -168,6 +168,8 @@ class GomokuWindow(QMainWindow):
                 game_y = int((mouse_y + 15) // 40) - 1
             else:  # 鼠标点击的位置不正确
                 return
+            if self.g.g_map[game_x][game_y] != 0:
+                return
             self.g.move_1step(game_x, game_y)
 
             # 2. 根据操作结果进行一轮游戏循环
