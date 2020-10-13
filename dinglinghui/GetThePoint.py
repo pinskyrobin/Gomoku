@@ -15,13 +15,12 @@ def search_line(board, row):
     return node_list
 
 
-def search_node(board, node):
+def search_node(board, node_list):
     node_list = []
+    board.chessboard[node.y][node.x] = BOARD_BUILTIN.BLACK
     for i in range(BOARD_BUILTIN.HEIGHT):
         node_list.extend(search_line(board, i))
-    for i in node_list:
-        if i == node:
-            node_list.remove(i)
+
     return node_list
 
 
@@ -30,6 +29,7 @@ def create_nodes(board, node):
         node.create_children(search_node(board, node))
         for i in node.children:
             create_nodes(board, i)
+
 
 
 def create_tree(board):
