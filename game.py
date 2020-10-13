@@ -1,3 +1,8 @@
+from dinglinghui.Board import Board
+from dinglinghui.Macro import PLAY_STATUS, PLAY_MODE, BOARD_BUILTIN
+from dinglinghui.PlayTheGame import machine_play, human_play
+
+
 class Gomoku:
 
     def __init__(self):
@@ -17,6 +22,7 @@ class Gomoku:
                 if self.g_map[pos_x][pos_y] == 0:
                     if self.cur_step % 2 == 0:
                         self.g_map[pos_x][pos_y] = 1
+                        machine_play(BOARD_BUILTIN.BLACK, transfer_list2_board_chess(self))
                     else:
                         self.g_map[pos_x][pos_y] = 2
                     self.cur_step += 1
@@ -125,3 +131,41 @@ class Gomoku:
             return 3, [(-1, -1)]
         else:
             return 3
+
+
+def transfer_list2_board_chess(self):
+    board = Board()
+    for i in range(BOARD_BUILTIN.HEIGHT):
+        for j in range(BOARD_BUILTIN.WIDTH):
+            board.chessboard[i][j] = self.g_map[i][j]
+    return board
+
+
+def transfer_board_chess2_list(self, board):
+    for i in range(BOARD_BUILTIN.HEIGHT):
+        for j in range(BOARD_BUILTIN.WIDTH):
+            self.g_map[i][j] = board.chessboard[i][j]
+
+
+def get_point_from_fronted(x, y):
+    # TODO:you need to transfer a pair of numbers (x, y) to this function.
+    return x, y
+
+
+"""
+def play_game(status, mode):
+    board = Board()
+    while status == PLAY_STATUS.NOT_SURE:
+        if mode == PLAY_MODE.MACHINE_MACHINE:
+            machine_play(status, board)
+            machine_play(status, board)
+        elif mode == PLAY_MODE.MACHINE_HUMAN:
+            machine_play(status, board)
+            human_play(status, board, get_point_from_fronted(0, 0))
+        else:
+            human_play(status, board, 0, 0)
+            machine_play(status, board)
+        status = board.judge_status()
+    print(status)
+    exit(0)
+"""

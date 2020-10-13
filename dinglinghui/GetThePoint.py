@@ -70,9 +70,9 @@ def create_nodes(board, node, node_list, alpha, beta, max_value, min_value, play
         return node_list
 
 
-def create_and_pure_tree(board):
+def create_and_pure_tree(board, player):
     node = Node(-1, -1)
-    nodelist = create_nodes(board, node, [], 0, 0, 0, 1000, 1)
+    nodelist = create_nodes(board, node, [], 0, 0, 0, 1000, player)
     return nodelist[0]
 
 

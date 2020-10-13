@@ -8,4 +8,3 @@ app = QApplication(sys.argv)
 ex = GomokuWindow()
 sys.exit(app.exec_())
 
-
