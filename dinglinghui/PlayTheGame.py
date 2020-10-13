@@ -1,6 +1,6 @@
-from Board import Board
-from GetThePoint import create_tree, find_the_best
-from Macro import FIRST_POINT, PLAY_MODE, PLAY_STATUS
+from .Board import Board
+from .GetThePoint import create_tree, find_the_best
+from .Macro import FIRST_POINT, PLAY_MODE, PLAY_STATUS
 
 
 def update_board(board, x, y, kind):

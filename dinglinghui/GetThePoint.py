@@ -1,5 +1,5 @@
-from Macro import BOARD_BUILTIN
-from Node import Node
+from .Macro import BOARD_BUILTIN
+from .Node import Node
 
 
 def search_line(board, row):

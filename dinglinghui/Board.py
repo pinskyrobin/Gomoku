@@ -2,7 +2,7 @@ from random import randint
 
 import numpy as np
 
-from Macro import PLAY_STATUS, FIRST_POINT, BOARD_BUILTIN
+from .Macro import PLAY_STATUS, FIRST_POINT, BOARD_BUILTIN
 
 
 class Board:

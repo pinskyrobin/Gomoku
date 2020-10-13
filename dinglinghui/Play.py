@@ -1,6 +1,6 @@
-from Board import Board
-from Macro import PLAY_MODE, PLAY_STATUS, BOARD_BUILTIN
-from PlayTheGame import human_play, machine_play
+from .Board import Board
+from .Macro import PLAY_MODE, PLAY_STATUS, BOARD_BUILTIN
+from .PlayTheGame import human_play, machine_play
 
 
 class play:
