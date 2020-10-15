@@ -1,6 +1,6 @@
-from Board import Board
-from Macro import PLAY_MODE, PLAY_STATUS, BOARD_BUILTIN
-from PlayTheGame import human_play, machine_play
+from .Board import Board
+from .Macro import PLAY_MODE, PLAY_STATUS, BOARD_BUILTIN
+from .PlayTheGame import human_play, machine_play
 
 
 class play:
@@ -8,4 +8,4 @@ class play:
         self.status = PLAY_STATUS.NOT_SURE
         self.play_mode = play_mode
         self.hardship = hardship
-        self.first = BOARD_BUILTIN.BLACK
+        self.first = BLACK

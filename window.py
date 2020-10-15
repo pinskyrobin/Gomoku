@@ -80,7 +80,7 @@ class GomokuWindow(QMainWindow):
 
         def draw_map():
             """绘制棋盘"""
-            qp.setPen(QPen(QColor(0, 0, 0), 2, Qt.SolidLine))  # 棋盘的颜色为黑色
+            qp.setPen(QPen(QColor(255, 255, 255), 2, Qt.SolidLine))  # 棋盘的颜色为黑色
             # 绘制横线
             for x in range(15):
                 qp.drawLine(40 * (x + 1), 40, 40 * (x + 1), 600)
@@ -167,6 +167,8 @@ class GomokuWindow(QMainWindow):
                 game_x = int((mouse_x + 15) // 40) - 1
                 game_y = int((mouse_y + 15) // 40) - 1
             else:  # 鼠标点击的位置不正确
+                return
+            if self.g.g_map[game_x][game_y] != 0:
                 return
             self.g.move_1step(game_x, game_y)
 
