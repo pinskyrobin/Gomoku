@@ -1,6 +1,7 @@
 from enum import IntEnum
 import copy
 
+
 class CHESS_TYPE(IntEnum):
     NONE = 0,
     SLEEP_TWO = 1,
@@ -23,3 +24,4 @@ SCORE_MIN = -1 * SCORE_MAX
 SCORE_FIVE, SCORE_FOUR, SCORE_SFOUR = 100000, 10000, 1000
 SCORE_THREE, SCORE_STHREE, SCORE_TWO, SCORE_STWO = 100, 10, 8, 2
 
+# This is a test message, to find out if it works well.
