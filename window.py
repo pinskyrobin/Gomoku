@@ -80,7 +80,7 @@ class GomokuWindow(QMainWindow):
 
         def draw_map():
             """绘制棋盘"""
-            qp.setPen(QPen(QColor(0, 0, 0), 2, Qt.SolidLine))  # 棋盘的颜色为黑色
+            qp.setPen(QPen(QColor(255, 255, 255), 2, Qt.SolidLine))  # 棋盘的颜色为黑色
             # 绘制横线
             for x in range(15):
                 qp.drawLine(40 * (x + 1), 40, 40 * (x + 1), 600)

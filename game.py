@@ -1,3 +1,8 @@
+from dinglinghui.Board import Board
+from dinglinghui.Macro import BLACK, HEIGHT, WIDTH, WHITE, BLANK
+from dinglinghui.PlayTheGame import machine_play
+
+
 class Gomoku:
 
     def __init__(self):
@@ -13,14 +18,13 @@ class Gomoku:
         """
         while True:
             # TODO: 加入AI后，需要把内嵌if语句删掉
-            if 0 <= pos_x <= 14 and 0 <= pos_y <= 14:
-                if self.g_map[pos_x][pos_y] == 0:
-                    if self.cur_step % 2 == 0:
-                        self.g_map[pos_x][pos_y] = 1
-                    else:
-                        self.g_map[pos_x][pos_y] = 2
-                    self.cur_step += 1
-                    return
+            board = Board()
+            board.hands = 0
+            update_board(self, pos_x, pos_y, board)
+            transfer_list2_board_chess(self, board)
+            pos_x, pos_y = machine_play(BLACK, board)
+            update_board(self, pos_x, pos_y, board)
+            return
 
     def game_result(self, show=False):
         """判断游戏的结局。0为游戏进行中，1为玩家获胜，2为电脑获胜，3为平局"""
@@ -125,3 +129,28 @@ class Gomoku:
             return 3, [(-1, -1)]
         else:
             return 3
+
+
+def update_board(self, pos_x, pos_y, board):
+    if 0 <= pos_x <= 14:
+        if 0 <= pos_y <= 14:
+            if self.g_map[pos_x][pos_y] == 0:
+                if self.cur_step % 2 == 0:
+                    self.g_map[pos_x][pos_y] = 1
+                else:
+                    self.g_map[pos_x][pos_y] = 2
+            self.cur_step += 1
+            board.hands += 1
+
+
+def transfer_list2_board_chess(self, board):
+    for i in range(HEIGHT):
+        for j in range(WIDTH):
+            if self.g_map[i][j] == 1:
+                board.chessboard[i][j] = BLACK
+            elif self.g_map[i][j] == 2:
+                board.chessboard[i][j] = WHITE
+            else:
+                board.chessboard[i][j] = BLANK
+
+
