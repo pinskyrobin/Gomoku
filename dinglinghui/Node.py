@@ -1,4 +1,5 @@
-from .Macro import BOARD_BUILTIN
+from .Macro import BLANK
+
 
 class Node:
     def __init__(self, x, y):
@@ -6,7 +7,7 @@ class Node:
         self.y = y
         self.children = []
         self.depth = 0
-        self.kind = BOARD_BUILTIN.BLANK
+        self.kind = BLANK
         self.alpha = 1000
         self.beta = -1000
 
