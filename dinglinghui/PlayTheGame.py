@@ -1,6 +1,7 @@
-from .Board import Board
-from .GetThePoint import create_and_pure_tree
-from .Macro import FIRST_POINT, PLAY_MODE, PLAY_STATUS, BOARD_BUILTIN
+from dinglinghui.GetThePoint import create_and_pure_tree
+import logging
+
+from dinglinghui.Macro import KIND_2
 
 
 def update_board(board, x, y, kind):
@@ -9,6 +10,8 @@ def update_board(board, x, y, kind):
 
 
 def human_play(player, board, x, y):
+    logging.debug("enter human play function")
+    logging.info("player: "+str(player))
     if board.hands == 0:
         return first_play(player, board)
     # x, y = input("input position:")
@@ -18,7 +21,9 @@ def human_play(player, board, x, y):
 
 
 def first_play(player, board):
-    x, y = board.first_play(FIRST_POINT.KIND_2)
+    logging.debug("enter first play function")
+    logging.info("player: "+str(player))
+    x, y = board.first_play(KIND_2)
     board.chessboard[y][x] = player
     update_board(board, x, y, player)
     board.hands += 1
@@ -26,12 +31,15 @@ def first_play(player, board):
 
 
 def machine_play(player, board):
+    logging.debug("enter machine play function")
+    logging.info("This is the player: "+str(player))
+    x, y = 0, 0
     if board.hands == 0:
-        first_play(player, board)
+        x, y = first_play(player, board)
     else:
-        result = create_and_pure_tree(board, player)
-        update_board(board, result.x, result.y, player)
+        x, y = create_and_pure_tree(board, player)
+        # update_board(board, result.x, result.y, player)
     board.hands += 1
-    return board
+    return x, y
 
 

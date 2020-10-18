@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QApplication
-from game import Gomoku
-from window import GomokuWindow
 import sys
 
+from PyQt5.QtWidgets import QApplication
+
+from window import GomokuWindow
 
 app = QApplication(sys.argv)
 ex = GomokuWindow()
