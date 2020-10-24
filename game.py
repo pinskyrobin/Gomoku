@@ -1,6 +1,7 @@
 from dinglinghui.Board import Board
-from dinglinghui.Macro import BLACK, HEIGHT, WIDTH, WHITE, BLANK
-from dinglinghui.PlayTheGame import machine_play
+from dinglinghui.GetThePoint import findBestChess
+from dinglinghui.Macro import BLACK, HEIGHT, WIDTH, WHITE, BLANK, MAP_ENTRY_TYPE
+from dinglinghui.search_level1 import ChessAI
 
 
 class Gomoku:
@@ -9,6 +10,7 @@ class Gomoku:
         self.g_map = [[0 for y in range(15)] for x in range(15)]  # 当前的棋盘
         self.cur_step = 0  # 步数
         self.max_search_steps = 3  # 最远搜索2回合之后
+        self.turn = MAP_ENTRY_TYPE.MAP_PLAYER_ONE
 
     def move_1step(self, pos_x=None, pos_y=None):
         """
@@ -16,14 +18,44 @@ class Gomoku:
         :param pos_x: 输入的x坐标
         :param pos_y: 输入的y坐标
         """
+        board = [[BLANK for y in range(15)] for x in range(15)]
+        for i in range(HEIGHT):
+            for j in range(WIDTH):
+                if self.g_map[i][j] == 1:
+                    board[i][j] = BLACK
+                elif self.g_map[i][j] == 2:
+                    board[i][j] = WHITE
+                else:
+                    board[i][j] = BLANK
         while True:
+            """
+            if self.cur_step % 2 == 0:
+                self.turn = MAP_ENTRY_TYPE.MAP_PLAYER_ONE
+            else:
+                self.turn = MAP_ENTRY_TYPE.MAP_PLAYER_TWO
+            """
             # TODO: 加入AI后，需要把内嵌if语句删掉
+            """
             board = Board()
             board.hands = 0
-            update_board(self, pos_x, pos_y, board)
             transfer_list2_board_chess(self, board)
+            update_board(self, pos_x, pos_y)
+            board.hands += 1
+            self.cur_step += 1
             pos_x, pos_y = machine_play(BLACK, board)
-            update_board(self, pos_x, pos_y, board)
+            update_board(self, pos_x, pos_y)
+            board.hands +=1
+            self.cur_step += 1
+            """
+            update_board(self, pos_x, pos_y)
+            self.cur_step += 1
+            # transfer_list2_board_chess(self, board)
+            """
+            x, y = ai.findBestChess(board, self.turn)
+            update_board(self, x, y)
+            self.cur_step += 1
+            transfer_list2_board_chess(self, board)
+            """
             return
 
     def game_result(self, show=False):
@@ -131,7 +163,7 @@ class Gomoku:
             return 3
 
 
-def update_board(self, pos_x, pos_y, board):
+def update_board(self, pos_x, pos_y):
     if 0 <= pos_x <= 14:
         if 0 <= pos_y <= 14:
             if self.g_map[pos_x][pos_y] == 0:
@@ -139,18 +171,14 @@ def update_board(self, pos_x, pos_y, board):
                     self.g_map[pos_x][pos_y] = 1
                 else:
                     self.g_map[pos_x][pos_y] = 2
-            self.cur_step += 1
-            board.hands += 1
 
 
 def transfer_list2_board_chess(self, board):
     for i in range(HEIGHT):
         for j in range(WIDTH):
             if self.g_map[i][j] == 1:
-                board.chessboard[i][j] = BLACK
+                board[i][j] = BLACK
             elif self.g_map[i][j] == 2:
-                board.chessboard[i][j] = WHITE
+                board[i][j] = WHITE
             else:
-                board.chessboard[i][j] = BLANK
-
-
+                board[i][j] = BLANK

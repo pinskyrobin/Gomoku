@@ -1,3 +1,4 @@
+from dinglinghui.Macro import MAP_ENTRY_TYPE, CHESS_TYPE
 
 CHESS_TYPE_NUM = 8
 
@@ -22,17 +23,20 @@ class BoardEvaluate:
         # record用来标记每个点的四个方向是否被统计过棋型，count统计两种棋的各种棋型,count[0]保存我方
         self.record = [[[0, 0, 0, 0] for x in range(chess_len)] for y in range(chess_len)]
         self.count = [[0 for x in range(CHESS_TYPE_NUM)] for i in range(2)]
-        self.board = board
+        self.board = [[0 for x in range(chess_len)] for y in range(chess_len)]
         self.turn = turn
+        for i in range(chess_len):
+            for j in range(chess_len):
+                self.board[i][j] = board[i][j]
 
     def evaluate(self, checkWin=False):
 
-        if self.turn == BLACK:
-            mine = BLACK
-            opponent = WHITE
+        if self.turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
+            mine = 1
+            opponent = 2
         else:
-            mine = WHITE
-            opponent = BLACK
+            mine = 2
+            opponent = 1
 
         for x in range(chess_len):
             for y in range(chess_len):
@@ -47,6 +51,35 @@ class BoardEvaluate:
             mscore, oscore = self.getScore(self.count[0], self.count[1])
             return (mscore - oscore)
 
+    def getPointScore(self, count):
+        score = 0
+        if count[FIVE] > 0:
+            return SCORE_FIVE
+
+        if count[FOUR] > 0:
+            return SCORE_FOUR
+
+        # FIXME: the score of one chong four and no live three should be low, set it to live three
+        if count[SFOUR] > 1:
+            score += count[SFOUR] * SCORE_SFOUR
+        elif count[SFOUR] > 0 and count[THREE] > 0:
+            score += count[SFOUR] * SCORE_SFOUR
+        elif count[SFOUR] > 0:
+            score += SCORE_THREE
+
+        if count[THREE] > 1:
+            score += 5 * SCORE_THREE
+        elif count[THREE] > 0:
+            score += SCORE_THREE
+
+        if count[STHREE] > 0:
+            score += count[STHREE] * SCORE_STHREE
+        if count[TWO] > 0:
+            score += count[TWO] * SCORE_TWO
+        if count[STWO] > 0:
+            score += count[STWO] * SCORE_STWO
+
+        return score
     # 将统计完的数组计分，参数为我的棋型列表及对方的,返回我方分数及对方的
     def getScore(self, mine_count, opponent_count):
         mscore, oscore = 0, 0
@@ -298,4 +331,196 @@ class BoardEvaluate:
 
         return 0
 
+    def evaluatePoint_level3(self, x, y, mine, opponent, count=None):
+        dir_offset = [(1, 0), (0, 1), (1, 1), (1, -1)]  # direction from left to right
+        ignore_record = True
+        if count is None:
+            count = self.count[mine - 1]
+            ignore_record = False
+        for i in range(4):
+            if self.record[y][x][i] == 0 or ignore_record:
+                self.analysisLine_level3(self.board, x, y, i, dir_offset[i], mine, opponent, count)
 
+    def analysisLine_level3(self, board, x, y, dir_index, dir, mine, opponent, count):
+        # record line range[left, right] as analysized
+        def setRecord(self, x, y, left, right, dir_index, dir_offset):
+            tmp_x = x + (-5 + left) * dir_offset[0]
+            tmp_y = y + (-5 + left) * dir_offset[1]
+            for i in range(left, right + 1):
+                tmp_x += dir_offset[0]
+                tmp_y += dir_offset[1]
+                self.record[tmp_y][tmp_x][dir_index] = 1
+
+        empty = MAP_ENTRY_TYPE.MAP_EMPTY.value
+        left_idx, right_idx = 4, 4
+
+        line = self.getLine(x, y, dir, mine, opponent)
+
+        while right_idx < 8:
+            if line[right_idx + 1] != mine:
+                break
+            right_idx += 1
+        while left_idx > 0:
+            if line[left_idx - 1] != mine:
+                break
+            left_idx -= 1
+
+        left_range, right_range = left_idx, right_idx
+        while right_range < 8:
+            if line[right_range + 1] == opponent:
+                break
+            right_range += 1
+        while left_range > 0:
+            if line[left_range - 1] == opponent:
+                break
+            left_range -= 1
+
+        chess_range = right_range - left_range + 1
+        if chess_range < 5:
+            setRecord(self, x, y, left_range, right_range, dir_index, dir)
+            return CHESS_TYPE.NONE
+
+        setRecord(self, x, y, left_idx, right_idx, dir_index, dir)
+
+        m_range = right_idx - left_idx + 1
+
+        # M:mine chess, P:opponent chess or out of range, X: empty
+        if m_range >= 5:
+            count[FIVE] += 1
+
+        # Live Four : XMMMMX
+        # Chong Four : XMMMMP, PMMMMX
+        if m_range == 4:
+            left_empty = right_empty = False
+            if line[left_idx - 1] == empty:
+                left_empty = True
+            if line[right_idx + 1] == empty:
+                right_empty = True
+            if left_empty and right_empty:
+                count[FOUR] += 1
+            elif left_empty or right_empty:
+                count[SFOUR] += 1
+
+        # Chong Four : MXMMM, MMMXM, the two types can both exist
+        # Live Three : XMMMXX, XXMMMX
+        # Sleep Three : PMMMX, XMMMP, PXMMMXP
+        if m_range == 3:
+            left_empty = right_empty = False
+            left_four = right_four = False
+            if line[left_idx - 1] == empty:
+                if line[left_idx - 2] == mine:  # MXMMM
+                    setRecord(self, x, y, left_idx - 2, left_idx - 1, dir_index, dir)
+                    count[SFOUR] += 1
+                    left_four = True
+                left_empty = True
+
+            if line[right_idx + 1] == empty:
+                if line[right_idx + 2] == mine:  # MMMXM
+                    setRecord(self, x, y, right_idx + 1, right_idx + 2, dir_index, dir)
+                    count[SFOUR] += 1
+                    right_four = True
+                right_empty = True
+
+            if left_four or right_four:
+                pass
+            elif left_empty and right_empty:
+                if chess_range > 5:  # XMMMXX, XXMMMX
+                    count[THREE] += 1
+                else:  # PXMMMXP
+                    count[STHREE] += 1
+            elif left_empty or right_empty:  # PMMMX, XMMMP
+                count[STHREE] += 1
+
+        # Chong Four: MMXMM, only check right direction
+        # Live Three: XMXMMX, XMMXMX the two types can both exist
+        # Sleep Three: PMXMMX, XMXMMP, PMMXMX, XMMXMP
+        # Live Two: XMMX
+        # Sleep Two: PMMX, XMMP
+        if m_range == 2:
+            left_empty = right_empty = False
+            left_three = right_three = False
+            if line[left_idx - 1] == empty:
+                if line[left_idx - 2] == mine:
+                    setRecord(self, x, y, left_idx - 2, left_idx - 1, dir_index, dir)
+                    if line[left_idx - 3] == empty:
+                        if line[right_idx + 1] == empty:  # XMXMMX
+                            count[THREE] += 1
+                        else:  # XMXMMP
+                            count[STHREE] += 1
+                        left_three = True
+                    elif line[left_idx - 3] == opponent:  # PMXMMX
+                        if line[right_idx + 1] == empty:
+                            count[STHREE] += 1
+                            left_three = True
+
+                left_empty = True
+
+            if line[right_idx + 1] == empty:
+                if line[right_idx + 2] == mine:
+                    if line[right_idx + 3] == mine:  # MMXMM
+                        setRecord(self, x, y, right_idx + 1, right_idx + 2, dir_index, dir)
+                        count[SFOUR] += 1
+                        right_three = True
+                    elif line[right_idx + 3] == empty:
+                        # setRecord(self, x, y, right_idx+1, right_idx+2, dir_index, dir)
+                        if left_empty:  # XMMXMX
+                            count[THREE] += 1
+                        else:  # PMMXMX
+                            count[STHREE] += 1
+                        right_three = True
+                    elif left_empty:  # XMMXMP
+                        count[STHREE] += 1
+                        right_three = True
+
+                right_empty = True
+
+            if left_three or right_three:
+                pass
+            elif left_empty and right_empty:  # XMMX
+                count[TWO] += 1
+            elif left_empty or right_empty:  # PMMX, XMMP
+                count[STWO] += 1
+
+        # Live Two: XMXMX, XMXXMX only check right direction
+        # Sleep Two: PMXMX, XMXMP
+        if m_range == 1:
+            left_empty = right_empty = False
+            if line[left_idx - 1] == empty:
+                if line[left_idx - 2] == mine:
+                    if line[left_idx - 3] == empty:
+                        if line[right_idx + 1] == opponent:  # XMXMP
+                            count[STWO] += 1
+                left_empty = True
+
+            if line[right_idx + 1] == empty:
+                if line[right_idx + 2] == mine:
+                    if line[right_idx + 3] == empty:
+                        if left_empty:  # XMXMX
+                            # setRecord(self, x, y, left_idx, right_idx+2, dir_index, dir)
+                            count[TWO] += 1
+                        else:  # PMXMX
+                            count[STWO] += 1
+                elif line[right_idx + 2] == empty:
+                    if line[right_idx + 3] == mine and line[right_idx + 4] == empty:  # XMXXMX
+                        count[TWO] += 1
+
+        return CHESS_TYPE.NONE
+
+    def evaluatePointScore(self, x, y, mine, opponent):
+        dir_offset = [(1, 0), (0, 1), (1, 1), (1, -1)]  # direction from left to right
+        for i in range(len(self.count)):
+            for j in range(len(self.count[0])):
+                self.count[i][j] = 0
+
+        self.board[y][x] = mine
+        self.evaluatePoint_level3(x, y, mine, opponent, self.count[mine - 1])
+        mine_count = self.count[mine - 1]
+        self.board[y][x] = opponent
+        self.evaluatePoint_level3(x, y, opponent, mine, self.count[opponent - 1])
+        opponent_count = self.count[opponent - 1]
+        self.board[y][x] = 0
+
+        mscore = self.getPointScore(mine_count)
+        oscore = self.getPointScore(opponent_count)
+
+        return (mscore, oscore)
