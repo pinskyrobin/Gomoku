@@ -41,7 +41,7 @@ class ChessAI():
         moves = []
         for y in range(self.len):
             for x in range(self.len):
-                if board[x][y] == 0:
+                if board[y][x] == 0:
                     score = self.pos_score[y][x]
                     moves.append((score, x, y))
                 else:
@@ -56,9 +56,9 @@ class ChessAI():
         bestmove = None
         max_score = -0x7fffffff
         for score, x, y in moves:
-            board[x][y] = turn.value
+            board[y][x] = turn.value
             score = board_evaluate.evaluate()
-            board[x][y] = 0
+            board[y][x] = 0
 
             if score > max_score:
                 max_score = score

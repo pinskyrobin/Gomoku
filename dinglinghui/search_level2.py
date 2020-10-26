@@ -19,6 +19,9 @@ SCORE_MIN = -1 * SCORE_MAX
 SCORE_FIVE = 10000
 
 
+
+
+
 class ChessAI():
     def __init__(self, chess_len):
         self.len = chess_len
@@ -27,18 +30,6 @@ class ChessAI():
         self.count = [[0 for x in range(CHESS_TYPE_NUM)] for i in range(2)]
         self.pos_score = [[(7 - max(abs(x - 7), abs(y - 7))) for x in range(chess_len)] for y in range(chess_len)]
 
-    def reset(self):
-        for y in range(self.len):
-            for x in range(self.len):
-                for i in range(4):
-                    self.record[y][x][i] = 0
-
-        for i in range(len(self.count)):
-            for j in range(len(self.count[0])):
-                self.count[i][j] = 0
-
-    def click(self, map, x, y, turn):
-        map.click(x, y, turn)
 
     def isWin(self, board, turn):
         board_evaluate = BoardEvaluate(board, turn)
@@ -51,29 +42,19 @@ class ChessAI():
 
         for i in range(start_y, end_y + 1):
             for j in range(start_x, end_x + 1):
-                if i >= 0 and i < self.len and j >= 0 and j < self.len:
+                if 0 <= i < self.len and 0 <= j < self.len:
                     if board[i][j] != 0:
                         return True
         return False
 
     # get all positions near chess
     def genmove(self, board, turn):
-        fives = []
-        mfours, ofours = [], []
-        msfours, osfours = [], []
-        if turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
-            mine = 1
-            opponent = 2
-        else:
-            mine = 2
-            opponent = 1
-
         moves = []
         radius = 1
 
         for y in range(self.len):
             for x in range(self.len):
-                if board[x][y] == 0 and self.hasNeighbor(board, x, y, radius):
+                if board[y][x] == 0 and self.hasNeighbor(board, x, y, radius):
                     score = self.pos_score[y][x]
                     moves.append((score, x, y))
 
@@ -96,7 +77,7 @@ class ChessAI():
             return score
 
         for _, x, y in moves:
-            board[x][y] = turn
+            board[y][x] = turn
 
             if turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
                 op_turn = MAP_ENTRY_TYPE.MAP_PLAYER_TWO
@@ -105,7 +86,7 @@ class ChessAI():
 
             score = - self.__search(board, op_turn, depth - 1, -beta, -alpha)
 
-            board[x][y] = 0
+            board[y][x] = 0
             self.belta += 1
 
             # alpha/beta pruning
@@ -125,25 +106,27 @@ class ChessAI():
         self.bestmove = None
         moves = []
         score = self.__search(board, turn, depth)
-        if self.bestmove != None:
+        if self.bestmove:
             x, y = self.bestmove
             return score, x, y
         else:
-            for i in range(HEIGHT):
-                for j in range(WIDTH):
-                    if(board[i][j] == 0):
-                        score = self.pos_score[j][i]
+            for i in range(self.len):
+                for j in range(self.len):
+                    if board[i][j] == 0:
+                        score = self.pos_score[i][j]
                         moves.append((score, i, j))
             k = len(moves)
             res = random.randint(0, k - 1)
             return moves[res]
 
+
     def findBestChess(self, board, turn):
         time1 = time.time()
         self.alpha = 0
         self.belta = 0
+        insult = turn
         score, x, y = self.search(board, turn, AI_SEARCH_DEPTH)
         time2 = time.time()
-        print('time[%.2f] (%d, %d), score[%d] alpha[%d] belta[%d]' % (
-            (time2 - time1), x, y, score, self.alpha, self.belta))
-        return (x, y)
+        print('time[%.2f] (%d, %d, %d), score[%d] alpha[%d] belta[%d]' % (
+            (time2 - time1), x, y, insult, score, self.alpha, self.belta))
+        return x, y

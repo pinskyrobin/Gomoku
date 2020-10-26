@@ -48,7 +48,7 @@ SCORE_FIVE = 10000
 class MAP_ENTRY_TYPE(IntEnum):
     MAP_EMPTY = 0,
     MAP_PLAYER_ONE = 1,
-    MAP_PLAYER_TWO = -1,
+    MAP_PLAYER_TWO = 2,
     MAP_NONE = 3,
 
 

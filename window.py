@@ -173,9 +173,7 @@ class GomokuWindow(QMainWindow):
                 game_y = int((mouse_y + 15) // 40) - 1
             else:  # 鼠标点击的位置不正确
                 return
-            if self.g.g_map[game_x][game_y] != 0:
-                return
-            self.g.move_1step(game_x, game_y)
+            self.g.move_1step(game_y, game_x, MAP_ENTRY_TYPE.MAP_PLAYER_ONE)
         """
             # 2. 根据操作结果进行一轮游戏循环
             res, self.flash_pieces = self.g.game_result(show=True)  # 判断游戏结果
@@ -193,9 +191,9 @@ class GomokuWindow(QMainWindow):
         #self.g.move_1step(x, y)
         #x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
         #TODO:xia mian shi diao yong deng ji er de ji qi shi fan.
-        ai2 = level2(HEIGHT)
-        x, y = ai2.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_ONE)
-        self.g.move_1step(x, y)
+        ai2 = level1(HEIGHT)
+        x, y = ai2.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        self.g.move_1step(x, y, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
         #ai3 = level3(HEIGHT)
         #x, y = ai3.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
 

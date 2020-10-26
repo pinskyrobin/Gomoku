@@ -23,13 +23,21 @@ class BoardEvaluate:
         # record用来标记每个点的四个方向是否被统计过棋型，count统计两种棋的各种棋型,count[0]保存我方
         self.record = [[[0, 0, 0, 0] for x in range(chess_len)] for y in range(chess_len)]
         self.count = [[0 for x in range(CHESS_TYPE_NUM)] for i in range(2)]
-        self.board = [[0 for x in range(chess_len)] for y in range(chess_len)]
+        self.board = board
         self.turn = turn
-        for i in range(chess_len):
-            for j in range(chess_len):
-                self.board[i][j] = board[i][j]
+
+    def reset(self):
+        for y in range(chess_len):
+            for x in range(chess_len):
+                for i in range(4):
+                    self.record[y][x][i] = 0
+
+        for i in range(len(self.count)):
+            for j in range(len(self.count[0])):
+                self.count[i][j] = 0
 
     def evaluate(self, checkWin=False):
+        self.reset()
 
         if self.turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
             mine = 1
@@ -38,18 +46,46 @@ class BoardEvaluate:
             mine = 2
             opponent = 1
 
-        for x in range(chess_len):
-            for y in range(chess_len):
-                if self.board[x][y] == mine:
+        for y in range(chess_len):
+            for x in range(chess_len):
+                if self.board[y][x] == mine:
                     self.evaluatePoint(x, y, mine, opponent)
-                elif self.board[x][y] == opponent:
+                elif self.board[y][x] == opponent:
                     self.evaluatePoint(x, y, opponent, mine)
+        mine_count = self.count[mine - 1]
+        opponent_count = self.count[opponent - 1]
 
         if checkWin:
-            return self.count[0][FIVE] > 0
+            return mine_count[FIVE] > 0
         else:
-            mscore, oscore = self.getScore(self.count[0], self.count[1])
-            return (mscore - oscore)
+            mscore, oscore = self.getScore(mine_count, opponent_count)
+            return mscore - oscore
+
+    def evaluate_level3(self, checkWin=False):
+        self.reset()
+
+        if self.turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
+            mine = 1
+            opponent = 2
+        else:
+            mine = 2
+            opponent = 1
+
+        for y in range(chess_len):
+            for x in range(chess_len):
+                if self.board[y][x] == mine:
+                    self.evaluatePoint_level3(x, y, mine, opponent)
+                elif self.board[y][x] == opponent:
+                    self.evaluatePoint_level3(x, y, opponent, mine)
+        mine_count = self.count[mine - 1]
+        opponent_count = self.count[opponent - 1]
+
+        if checkWin:
+            return mine_count[FIVE] > 0
+        else:
+            mscore, oscore = self.getScore(mine_count, opponent_count)
+            return mscore - oscore
+
 
     def getPointScore(self, count):
         score = 0
@@ -84,7 +120,7 @@ class BoardEvaluate:
     def getScore(self, mine_count, opponent_count):
         mscore, oscore = 0, 0
         if mine_count[FIVE] > 0:
-            return (10000, 0)
+            return 10000, 0
         if opponent_count[FIVE] > 0:
             return (0, 10000)
         # 两个眠四也相当于活四，即必杀
@@ -138,9 +174,13 @@ class BoardEvaluate:
         return (mscore, oscore)
 
     # 对点（x，y）的四个方向逐一分析
-    def evaluatePoint(self, x, y, mine, opponent):
+    def evaluatePoint(self, x, y, mine, opponent, count = None):
         dir_offset = [(1, 0), (0, 1), (1, 1), (1, -1)]  # 四个方向的一步距离，分别为右，上，右上，右下
-        for i in range(4):
+        ignore_record = True
+        if count is None:
+            count = self.count[mine - 1]
+            ignore_record = False
+        for i in range(4) or ignore_record:
             if self.record[y][x][i] == 0:
                 self.analysisLine(x, y, i, dir_offset[i], mine, opponent)
 
@@ -341,7 +381,7 @@ class BoardEvaluate:
             if self.record[y][x][i] == 0 or ignore_record:
                 self.analysisLine_level3(self.board, x, y, i, dir_offset[i], mine, opponent, count)
 
-    def analysisLine_level3(self, board, x, y, dir_index, dir, mine, opponent, count):
+    def analysisLine_level3(self, x, y, dir_index, dir, mine, opponent, count):
         # record line range[left, right] as analysized
         def setRecord(self, x, y, left, right, dir_index, dir_offset):
             tmp_x = x + (-5 + left) * dir_offset[0]
@@ -523,4 +563,4 @@ class BoardEvaluate:
         mscore = self.getPointScore(mine_count)
         oscore = self.getPointScore(opponent_count)
 
-        return (mscore, oscore)
+        return mscore, oscore
