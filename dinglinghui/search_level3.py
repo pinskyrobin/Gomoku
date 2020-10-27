@@ -8,9 +8,6 @@ from la.evaluate import BoardEvaluate
 AI_SEARCH_DEPTH = 4
 AI_LIMITED_MOVE_NUM = 20
 
-
-
-
 CHESS_TYPE_NUM = 8
 
 FIVE = CHESS_TYPE.LIVE_FIVE.value
@@ -40,33 +37,9 @@ class ChessAI():
             for j in range(len(self.count[0])):
                 self.count[i][j] = 0
 
-    def click(self, map, x, y, turn):
-        map.click(x, y, turn)
-
     def isWin(self, board, turn):
         board_evaluate = BoardEvaluate(board, turn)
         return board_evaluate.evaluate()
-
-    # evaluate score of point, to improve pruning efficiency
-    def evaluatePointScore(self, board, x, y, mine, opponent):
-        board_evaluate = BoardEvaluate(board, turn)
-        dir_offset = [(1, 0), (0, 1), (1, 1), (1, -1)]  # direction from left to right
-        for i in range(len(self.count)):
-            for j in range(len(self.count[0])):
-                self.count[i][j] = 0
-
-        board[y][x] = mine
-        board_evaluate.evaluatePoint_level3(x, y, mine, opponent, self.count[opponent-1])
-        mine_count = self.count[mine - 1]
-        board[y][x] = opponent
-        board_evaluate.evaluatePoint_level3(x, y, opponent, mine, self.count[mine-1])
-        opponent_count = self.count[opponent - 1]
-        board[y][x] = 0
-
-        mscore = board_evaluate.getPointScore(mine_count)
-        oscore = board_evaluate.getPointScore(opponent_count)
-
-        return (mscore, oscore)
 
     # check if has a none empty position in it's radius range
     def hasNeighbor(self, board, x, y, radius):
@@ -86,7 +59,7 @@ class ChessAI():
         fives = []
         mfours, ofours = [], []
         msfours, osfours = [], []
-        mine,opponent = 0, 0
+        mine, opponent = 0, 0
         if turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
             mine = 1
             opponent = 2
@@ -99,7 +72,7 @@ class ChessAI():
 
         for y in range(self.len):
             for x in range(self.len):
-                if board[x][y] == 0 and self.hasNeighbor(board, x, y, radius):
+                if board[y][x] == 0 and self.hasNeighbor(board, x, y, radius):
                     mscore, oscore = board_evaluate.evaluatePointScore(x, y, mine, opponent)
                     point = (max(mscore, oscore), x, y)
 
@@ -135,7 +108,7 @@ class ChessAI():
 
     def __search(self, board, turn, depth, alpha=SCORE_MIN, beta=SCORE_MAX):
         board_evaluate = BoardEvaluate(board, turn)
-        score = board_evaluate.evaluate()
+        score = board_evaluate.evaluate_level3()
         if depth <= 0 or abs(score) >= SCORE_FIVE:
             return score
 
@@ -148,7 +121,7 @@ class ChessAI():
             return score
 
         for _, x, y in moves:
-            board[x][y] = turn
+            board[y][x] = turn
 
             if turn == MAP_ENTRY_TYPE.MAP_PLAYER_ONE:
                 op_turn = MAP_ENTRY_TYPE.MAP_PLAYER_TWO
@@ -157,7 +130,7 @@ class ChessAI():
 
             score = - self.__search(board, op_turn, depth - 1, -beta, -alpha)
 
-            board[x][y] = 0
+            board[y][x] = 0
             self.belta += 1
 
             # alpha/beta pruning
@@ -183,7 +156,7 @@ class ChessAI():
             moves = []
             for i in range(HEIGHT):
                 for j in range(WIDTH):
-                    if (board[i][j] == 0):
+                    if board[i][j] == 0:
                         moves.append((score, i, j))
             k = len(moves)
             res = random.randint(0, k - 1)
@@ -196,5 +169,5 @@ class ChessAI():
         score, x, y = self.search(board, turn, AI_SEARCH_DEPTH)
         time2 = time.time()
         print('time[%.2f] (%d, %d), score[%d] alpha[%d] belta[%d]' % (
-        (time2 - time1), x, y, score, self.alpha, self.belta))
-        return (x, y)
+            (time2 - time1), x, y, score, self.alpha, self.belta))
+        return x, y
