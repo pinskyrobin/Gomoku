@@ -5,6 +5,10 @@ from PyQt5.QtWidgets import QWidget
 from game import Gomoku
 import os
 import QssTools
+from dinglinghui.search_level1 import ChessAI as level1
+from dinglinghui.search_level2 import ChessAI as level2
+from dinglinghui.search_level3 import ChessAI as level3
+from dinglinghui.Macro import MAP_ENTRY_TYPE, HEIGHT
 
 
 class CornerWidget(QWidget):
@@ -157,6 +161,7 @@ class GomokuWindow(QMainWindow):
 
     def mousePressEvent(self, e):
         """根据鼠标的动作，确定落子位置"""
+
         if not (hasattr(self, 'operate_status') and self.operate_status == 0):
             return
         if e.button() == Qt.LeftButton:
@@ -168,21 +173,39 @@ class GomokuWindow(QMainWindow):
                 game_y = int((mouse_y + 15) // 40) - 1
             else:  # 鼠标点击的位置不正确
                 return
-            if self.g.g_map[game_x][game_y] != 0:
-                return
-            self.g.move_1step(game_x, game_y)
-
+            self.g.move_1step(game_y, game_x, MAP_ENTRY_TYPE.MAP_PLAYER_ONE)
+        """
             # 2. 根据操作结果进行一轮游戏循环
             res, self.flash_pieces = self.g.game_result(show=True)  # 判断游戏结果
             if res != 0:  # 如果游戏结果为“已经结束”，则显示游戏内容，并退出主循环
                 self.repaint(0, 0, 650, 650)
                 self.game_restart(res)
                 return
-
-            # TODO: 目前只有玩家在玩
+        """
+            # TODO:we should rewrite a function to make the machine play.
             #  需要在完成AI部分代码后，仿照上述部分进行AI落子操作
 
-            self.repaint(0, 0, 650, 650)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
+            # self.repaint(0, 0, 650, 650)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
+        #ai1 = level1(HEIGHT)
+        #x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        #self.g.move_1step(x, y)
+        #x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        #TODO:xia mian shi diao yong deng ji er de ji qi shi fan.
+        ai2 = level1(HEIGHT)
+        x, y = ai2.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        self.g.move_1step(x, y, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        #ai3 = level3(HEIGHT)
+        #x, y = ai3.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+
+        #self.g.move_1step(x, y)
+
+
+        res, self.flash_pieces = self.g.game_result(show=True)  # 判断游戏结果
+        if res != 0:  # 如果游戏结果为“已经结束”，则显示游戏内容，并退出主循环
+            self.repaint(0, 0, 650, 650)
+            self.game_restart(res)
+            return
+        self.repaint(0, 0, 650, 650)
 
     def end_flash(self):
         # 游戏结束时的闪烁操作

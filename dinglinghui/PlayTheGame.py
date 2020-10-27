@@ -1,3 +1,4 @@
+"""
 from dinglinghui.GetThePoint import create_and_pure_tree
 import logging
 
@@ -23,11 +24,10 @@ def human_play(player, board, x, y):
 def first_play(player, board):
     logging.debug("enter first play function")
     logging.info("player: "+str(player))
-    x, y = board.first_play(KIND_2)
-    board.chessboard[y][x] = player
-    update_board(board, x, y, player)
+    board.chessboard[7][7] = player
+    update_board(board, 7, 7, player)
     board.hands += 1
-    return x, y
+    return board
 
 
 def machine_play(player, board):
@@ -41,5 +41,5 @@ def machine_play(player, board):
         # update_board(board, result.x, result.y, player)
     board.hands += 1
     return x, y
-
+"""
 

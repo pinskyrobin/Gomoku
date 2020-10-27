@@ -1,6 +1,7 @@
 from dinglinghui.Board import Board
-from dinglinghui.Macro import BLACK, HEIGHT, WIDTH, WHITE, BLANK
-from dinglinghui.PlayTheGame import machine_play
+from dinglinghui.GetThePoint import findBestChess
+from dinglinghui.Macro import BLACK, HEIGHT, WIDTH, WHITE, BLANK, MAP_ENTRY_TYPE
+from dinglinghui.search_level1 import ChessAI
 
 
 class Gomoku:
@@ -10,21 +11,34 @@ class Gomoku:
         self.cur_step = 0  # 步数
         self.max_search_steps = 3  # 最远搜索2回合之后
 
-    def move_1step(self, pos_x=None, pos_y=None):
+    def move_1step(self, pos_x=None, pos_y=None, i=1):
         """
         玩家落子
+        :param i:
         :param pos_x: 输入的x坐标
         :param pos_y: 输入的y坐标
         """
-        while True:
-            # TODO: 加入AI后，需要把内嵌if语句删掉
-            board = Board()
-            board.hands = 0
-            update_board(self, pos_x, pos_y, board)
-            transfer_list2_board_chess(self, board)
-            pos_x, pos_y = machine_play(BLACK, board)
-            update_board(self, pos_x, pos_y, board)
-            return
+        """
+        board = [[BLANK for y in range(15)] for x in range(15)]
+        
+        for i in range(HEIGHT):
+            for j in range(WIDTH):
+                if self.g_map[i][j] == 1:
+                    board[i][j] = BLACK
+                elif self.g_map[i][j] == 2:
+                    board[i][j] = WHITE
+                else:
+                    board[i][j] = BLANK
+            if self.cur_step % 2 == 0:
+                self.turn = MAP_ENTRY_TYPE.MAP_PLAYER_ONE
+            else:
+                self.turn = MAP_ENTRY_TYPE.MAP_PLAYER_TWO
+            """
+        # TODO: 加入AI后，需要把内嵌if语句删掉
+        if  self.g_map[pos_y][pos_x] == 0:
+            self.g_map[pos_y][pos_x] = i
+        self.cur_step += 1
+        # transfer_list2_board_chess(self, board)
 
     def game_result(self, show=False):
         """判断游戏的结局。0为游戏进行中，1为玩家获胜，2为电脑获胜，3为平局"""
@@ -130,27 +144,22 @@ class Gomoku:
         else:
             return 3
 
-
-def update_board(self, pos_x, pos_y, board):
-    if 0 <= pos_x <= 14:
-        if 0 <= pos_y <= 14:
-            if self.g_map[pos_x][pos_y] == 0:
-                if self.cur_step % 2 == 0:
-                    self.g_map[pos_x][pos_y] = 1
-                else:
-                    self.g_map[pos_x][pos_y] = 2
-            self.cur_step += 1
-            board.hands += 1
+    def update_board(self, pos_x, pos_y):
+        if 0 <= pos_x <= 14:
+            if 0 <= pos_y <= 14:
+                if self.g_map[pos_y][pos_x] == 0:
+                    if self.cur_step % 2 == 0:
+                        self.g_map[pos_y][pos_x] = 1
+                    else:
+                        self.g_map[pos_y][pos_x] = 2
 
 
 def transfer_list2_board_chess(self, board):
     for i in range(HEIGHT):
         for j in range(WIDTH):
             if self.g_map[i][j] == 1:
-                board.chessboard[i][j] = BLACK
+                board[i][j] = BLACK
             elif self.g_map[i][j] == 2:
-                board.chessboard[i][j] = WHITE
+                board[i][j] = WHITE
             else:
-                board.chessboard[i][j] = BLANK
-
-
+                board[i][j] = BLANK
