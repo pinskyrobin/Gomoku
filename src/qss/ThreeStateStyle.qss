@@ -1,8 +1,8 @@
-qss = '''
+
 QPushButton#pushButton {
-    font-family: "Webdings";
+    /*font-family: "Webdings";*/
     text-align: top;
-    background: #6DDF6D;
+    background: #6ddf6d;
     border-radius: 5px;
     border: none;
     font-size: 13px;
@@ -13,7 +13,7 @@ QPushButton#pushButton:hover {
 }
 
 QPushButton#pushButton_2 {
-    font-family: "Webdings";
+    /*font-family: "Webdings";*/
     background: #F7D674;
     border-radius: 5px;
     border: none;
@@ -25,7 +25,7 @@ QPushButton#pushButton_2:hover {
 }
 
 QPushButton#pushButton_3 {
-    font-family: "Webdings";
+    /*font-family: "Webdings";*/
     background: #F76677;
     border-radius: 5px;
     border: none;
@@ -36,5 +36,4 @@ QPushButton#pushButton_3:hover {
     background: red;
 }
 
-''
-'
+

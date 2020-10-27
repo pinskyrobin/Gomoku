@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
 from PyQt5.QtGui import QPainter, QPen, QColor, QPalette, QBrush, QPixmap, QRadialGradient, QCursor
 from PyQt5.QtCore import Qt, QPoint, QTimer
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QDialog, QDesktopWidget, QMessageBox
 from game import Gomoku
 import os
 import QssTools
@@ -33,6 +32,7 @@ class CornerWidget(QWidget):
 
 
 class GomokuWindow(QMainWindow):
+    loadStartWindow = True
 
     def __init__(self):
         super().__init__()
@@ -47,7 +47,7 @@ class GomokuWindow(QMainWindow):
         """初始化游戏界面"""
         # 1. 确定游戏界面的标题，大小和背景颜色
         self.setObjectName('MainWindow')
-        self.setWindowTitle('五子棋')
+        self.setWindowTitle('Gomoku')
         self.setFixedSize(650, 650)
 
         # 使用调色板功能
@@ -55,29 +55,34 @@ class GomokuWindow(QMainWindow):
         palette.setBrush(QPalette.Window, QBrush(QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'muzm.jpg'))))
         self.setPalette(palette)
 
-        # # 2. 设置鼠标光标样式
-        # # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
-        # pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png'))
-        # # 2.2 将光标对象传入鼠标对象中
-        # cursor = QCursor(pixmap, 0, 0)
-        # # 2.3 设置控件的光标
-        # self.setCursor(cursor)
+        # TODO:对该部分代码进行测试
+        # 2. 设置鼠标光标样式
+        # 2.1 创建光标的图像，参数为光标的相对位置（本文将光标存在工程目录的Cursor_png文件夹下）
+        pixmap = QPixmap(os.path.join(os.getcwd(), 'src', 'imgs', 'cursor.png')).scaled(35, 35)
+        # 2.2 将光标对象传入鼠标对象中
+        cursor = QCursor(pixmap, 0, 0)
+        # 2.3 设置控件的光标
+        self.setCursor(cursor)
 
         # 2. 开启鼠标位置的追踪。并在鼠标位置移动时，使用特殊符号标记当前的位置
         self.setMouseTracking(True)
+
         # 3. 鼠标位置移动时，对鼠标位置的特殊标记
         self.corner_widget = CornerWidget(self)
         self.corner_widget.repaint()
         self.corner_widget.hide()
+
         # 4. 游戏结束时闪烁的定时器
         self.end_timer = QTimer(self)
         self.end_timer.timeout.connect(self.end_flash)
         self.flash_cnt = 0  # 游戏结束之前闪烁了多少次
         self.flash_pieces = ((-1, -1),)  # 哪些棋子需要闪烁
+
         # 5.QSS美化
         QssTools.SetQss(os.path.join(os.getcwd(), 'src', 'qss', 'ThreeStateStyle.qss'), self)
-        # 6. 显示初始化的游戏界面
-        self.show()
+
+        # #6. 显示初始化的游戏界面
+        # self.show()
 
     def paintEvent(self, e):
         """绘制游戏内容"""
@@ -184,23 +189,24 @@ class GomokuWindow(QMainWindow):
                 self.game_restart(res)
                 return
         """
-            # TODO:we should rewrite a function to make the machine play.
-            #  需要在完成AI部分代码后，仿照上述部分进行AI落子操作
+        # TODO:we should rewrite a function to make the machine play.
+        #  需要在完成AI部分代码后，仿照上述部分进行AI落子操作
 
-            # self.repaint(0, 0, 650, 650)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
-        #ai1 = level1(HEIGHT)
-        #x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
-        #self.g.move_1step(x, y)
-        #x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
-        #TODO:xia mian shi diao yong deng ji er de ji qi shi fan.
+        # self.repaint(0, 0, 650, 650)  # 在游戏还没有结束的情况下，显示游戏内容，并继续下一轮循环
+        # ai1 = level1(HEIGHT)
+        # x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        # self.g.move_1step(x, y)
+        # x, y = ai1.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
+        # TODO:xia mian shi diao yong deng ji er de ji qi shi fan.
+
         ai2 = level2(HEIGHT)
         x, y = ai2.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_ONE)
         self.g.move_1step(x, y)
-        #ai3 = level3(HEIGHT)
-        #x, y = ai3.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
 
-        #self.g.move_1step(x, y)
+        # ai3 = level3(HEIGHT)
+        # x, y = ai3.findBestChess(self.g.g_map, MAP_ENTRY_TYPE.MAP_PLAYER_TWO)
 
+        # self.g.move_1step(x, y)
 
         res, self.flash_pieces = self.g.game_result(show=True)  # 判断游戏结果
         if res != 0:  # 如果游戏结果为“已经结束”，则显示游戏内容，并退出主循环
